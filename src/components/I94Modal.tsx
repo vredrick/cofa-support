@@ -108,12 +108,12 @@ export default function I94Modal({ open, onClose }: I94ModalProps) {
               href="https://i94.cbp.dhs.gov/search/history-search"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary flex-1 inline-flex items-center justify-center gap-2"
+              className="btn-secondary flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap !text-base"
             >
               <span className="material-symbols-outlined text-[18px]">history</span>
               View Travel History
             </a>
-            <button type="button" onClick={onClose} className="btn-secondary flex-1">
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 !text-base">
               Close
             </button>
           </div>

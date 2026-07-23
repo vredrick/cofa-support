@@ -102,7 +102,7 @@ body {
 
 /* Landing page styles */
 .nav-pill {
-  @apply fixed top-4 left-4 right-4 z-40 items-center gap-3 px-4 py-2.5 rounded-full border border-ocean/15 bg-white/80 backdrop-blur-xl md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto;
+  @apply fixed top-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2 items-center justify-between gap-4 rounded-full border border-ocean/15 bg-white/90 px-4 py-2.5 backdrop-blur-xl;
   box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
 }
 
@@ -138,4 +138,15 @@ body {
 
 .passport-hover {
   @apply transition-all duration-500 ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
