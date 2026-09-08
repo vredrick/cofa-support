@@ -1,5 +1,7 @@
 import { FORMS, OFFICES } from './definitions.mjs';
-import { createElectionPdf, printNotes } from './pdf.mjs';
+import { createElectionPdf, createInstructionPdf, printNotes } from './pdf.mjs';
+import { createSigningSection } from './signing.mjs';
+import { EMAIL_WARNING_BYTES } from './attachments.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, className, text) => {
@@ -13,6 +15,8 @@ const copy = (className, html) => { const node = el('div', className); node.inne
 const current = FORMS.find(form => form.id === new URLSearchParams(location.search).get('form'));
 const values = {};
 let blobUrl = null;
+let instructionUrl = null;
+let signing;
 let revision = 0;
 const matches = condition => !condition || values[condition.k] === condition.eq;
 
@@ -20,6 +24,9 @@ function clearResult() {
   revision++;
   $('result').hidden = true;
   if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
+  if (instructionUrl) { URL.revokeObjectURL(instructionUrl); instructionUrl = null; }
+  $('instructions-download').hidden = true;
+  $('instructions-download').removeAttribute('href');
   $('download').removeAttribute('href');
   $('preview').removeAttribute('href');
 }
@@ -30,6 +37,8 @@ function changed(key, value) {
   refresh();
 }
 function refresh() {
+  signing?.refresh(values);
+  $('guide-label').textContent = signing?.email ? 'Create a separate instruction sheet' : 'Include print instructions';
   document.querySelectorAll('[data-condition]').forEach(node => { node.hidden = !matches(JSON.parse(node.dataset.condition)); });
   document.querySelectorAll('[data-warn]').forEach(node => { node.hidden = !(values.fel === 'y' || values.men === 'y'); });
   const address = $('office-address');
@@ -38,9 +47,17 @@ function refresh() {
     address.textContent = OFFICES[values.state] ? `Mailing address printed on the form: ${OFFICES[values.state].join(', ')}` : '';
   }
 }
+function guidanceNote(html, state) {
+  const note = copy('note', html);
+  if (state) {
+    note.prepend(el('strong', 'guidance-label', `${state} election office guidance`));
+    note.append(el('p', 'guidance-scope', 'Registrants in Chuuk, Kosrae or Yap should confirm with their own election office.'));
+  }
+  return note;
+}
 function fieldNode(field, groupLabel) {
   if (field.q) return el('p', 'question', field.q);
-  if (field.askAfter) return copy('note', field.askAfter);
+  if (field.askAfter) return guidanceNote(field.askAfter, field.guidanceState);
   if (field.warnIf) { const node = copy('note', field.html); node.dataset.warn = 'true'; node.hidden = true; return node; }
   if (field.askIf) { const node = copy('note', field.html); node.dataset.condition = JSON.stringify(field.askIf); node.hidden = true; return node; }
   let node;
@@ -101,7 +118,7 @@ function showForm() {
     const host = el('section', 'section');
     if (section.h) host.append(el('h2', '', section.h));
     if (section.lede) host.append(el('p', 'lede', section.lede));
-    if (section.ask) host.append(copy('note', section.ask));
+    if (section.ask) host.append(guidanceNote(section.ask, section.guidanceState));
     let groupLabel = section.h || 'Choose an answer';
     let columns = null;
     for (const field of section.fields || []) {
@@ -116,9 +133,8 @@ function showForm() {
     if (section.infoFor) { const address = el('p', 'address'); address.id = 'office-address'; address.hidden = true; host.append(address); }
     $('form').append(host);
   }
-  const finish = el('section', 'section'); finish.append(el('h2', '', 'Print and sign by hand'), el('p', 'lede', printNotes(current)));
-  finish.append(el('p', 'hint', 'Check every answer before creating your PDF. Unknown fields may be left blank to complete by hand. The signature and date spaces stay blank.'));
-  $('form').append(finish);
+  signing = createSigningSection(current, () => { clearResult(); $('error').hidden = true; refresh(); });
+  $('form').append(signing.node);
   refresh();
 }
 if (current) showForm();
@@ -137,21 +153,36 @@ $('form').addEventListener('submit', async event => {
   clearResult(); $('error').hidden = true;
   const startedAt = revision;
   const snapshot = { ...values };
+  const includeGuide = $('guide').checked;
   try {
     if (!window.PDFLib) throw new Error('The PDF tool could not load. Reload this page and try again, or download the blank form.');
+    const options = signing.snapshot();
+    const email = signing.email;
     const response = await fetch(`../forms/fsm-${current.id}.pdf`);
     if (!response.ok) throw new Error('The form template could not load. Please try again.');
-    const bytes = await createElectionPdf(current, snapshot, await response.arrayBuffer(), $('guide').checked, window.PDFLib);
+    const bytes = await createElectionPdf(current, snapshot, await response.arrayBuffer(), includeGuide, window.PDFLib, options);
+    const instructions = email && includeGuide ? await createInstructionPdf(current, snapshot, true, window.PDFLib) : null;
     if (startedAt !== revision) throw new Error('Your answers changed while the PDF was being created. Create it again to include your latest answers.');
     blobUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
     $('download').href = blobUrl; $('download').download = current.filename;
     $('preview').href = blobUrl;
-    $('result-notes').textContent = printNotes(current);
+    if (instructions) {
+      instructionUrl = URL.createObjectURL(new Blob([instructions], { type: 'application/pdf' }));
+      $('instructions-download').href = instructionUrl;
+      $('instructions-download').download = 'FSM-registration-instructions-KEEP.pdf';
+      $('instructions-download').hidden = false;
+    }
+    $('result-title').textContent = email ? 'Your signed registration PDF is ready' : 'Your form is ready to print';
+    $('preview').textContent = email ? 'Preview signed PDF' : 'Open PDF to print';
+    $('result-notes').textContent = printNotes(current, snapshot, !!options.signature, !!options.attachments?.length);
+    $('result-help').textContent = email ? 'Download and check the PDF, then attach it to your email. The instruction sheet is separate. Nothing has been submitted.' : 'In the PDF viewer, choose Print or press Ctrl+P (Command+P on a Mac). Nothing has been submitted.';
+    $('size-warning').hidden = !email || bytes.byteLength <= EMAIL_WARNING_BYTES;
+    $('size-warning').textContent = `This PDF is ${(bytes.byteLength / 1024 / 1024).toFixed(1)} MB, over 20 MB. Email services may reject a large attachment. Choose “I'll attach them myself” and send smaller document files, or reduce your scanned PDFs before trying again.`;
     $('result').hidden = false; $('result').focus(); $('result').scrollIntoView({ block: 'center' });
   } catch (error) {
     $('error').textContent = error.message || 'The PDF could not be created. Please try again.';
     $('error').hidden = false; $('error').scrollIntoView({ block: 'center' });
   } finally { button.disabled = false; button.textContent = 'Create filled PDF'; }
 });
-window.addEventListener('pagehide', () => { if (blobUrl) URL.revokeObjectURL(blobUrl); });
+window.addEventListener('pagehide', clearResult);
 window.addEventListener('pageshow', event => { if (event.persisted) clearResult(); });

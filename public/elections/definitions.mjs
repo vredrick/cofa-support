@@ -1,3 +1,6 @@
+// Pohnpei-specific residence, SS-number and submission guidance was supplied by the
+// site owner from an email from DeeAnn David (Administrative Clerk), cc Esmeralda Panuelo.
+// Preserve this attributed guidance; absence from the public website does not invalidate it.
 // Form fields and PDF coordinates adapted from the user-supplied election form filler.
 // Templates: https://www.fsmned.fm/PDFgallery.htm (checked 2026-09-08).
 const usDate = iso => { if(!iso) return ""; const [y,m,d] = iso.split("-"); return `${m}/${d}/${y}`; };
@@ -83,7 +86,7 @@ export const FORMS = [
   blurb:"Complete your voter registration application and sworn affidavit, then print and sign it.",
   pdf:"registration",
   filename:"FSM-Voter-Registration.pdf",
-  intro:{kind:"note", html:"<b>This fills the form only.</b> Print it, sign inside the signature box without touching the borders, and follow your election office’s submission instructions."},
+  intro:{kind:"note", html:"<b>This fills the form only.</b> Print and sign by hand, or draw your signature below. Pohnpei registrants can send a signed registration and document copies by email. Registrants in Chuuk, Kosrae or Yap should confirm with their own office."},
   sections:[
     {h:"1. Purpose of application", fields:[
       {k:"purpose", t:"cards", options:[
@@ -103,7 +106,7 @@ export const FORMS = [
       ]}
     ]},
     {h:"5. SS # and Hosp. #",
-     ask:"Ask your state election office whether these identifiers are needed for your application. Leave them blank if you are unsure; do not guess.",
+     guidanceState:"Pohnpei", ask:"You can leave both of these blank. The Pohnpei National Election Office has confirmed that citizens registering from abroad do not need to supply a social security number, and that a United States social security number should not be used here. If you are registering in another state, confirm with that office.",
      fields:[
       {k:"ss",   l:"SS #",     t:"text", cols:2, at:{x:304.6,w:88.6,bot:324.9,size:10}},
       {k:"hosp", l:"Hosp. #",  t:"text", cols:2, at:{x:456.6,w:82.5,bot:324.9,size:10}}
@@ -139,7 +142,8 @@ export const FORMS = [
         {v:"n", l:"No",  box:{x:296.2,bot:510.8}}
       ]},
       {q:"10. I have resided in the state and election district since"},
-      {k:"since", l:"Resident since", t:"text", ph:"Date or residence history", info:"Enter the date or description that accurately reflects your residence in this district. Ask your state election office if you are unsure what to enter.", at:{x:466.8,w:72,bot:533.0,size:10}},
+      {k:"since", l:"Resident since", t:"text", ph:"Since Birth", info:"For citizens living abroad, Pohnpei's election office advises writing 'Since Birth' rather than a date. Your home village stays your permanent residence for election purposes, so time spent in the United States does not interrupt it. Write a date instead only if you moved into this district later in life. If you are registering in another state, confirm with that office.", at:{x:466.8,w:72,bot:533.0,size:10}},
+      {askAfter:"<b>If you live abroad, write 'Since Birth'.</b> The Pohnpei National Election Office has confirmed that for a citizen of the state, the home village remains your permanent residence for election purposes even after years living overseas.", guidanceState:"Pohnpei"},
       {q:"11. I am currently under parole, probation or sentence for any felony for which I have been convicted by any court of the FSM"},
       {k:"fel", t:"seg", options:[
         {v:"y", l:"Yes", box:{x:225.0,bot:566.8}},

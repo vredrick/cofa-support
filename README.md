@@ -1,6 +1,6 @@
 # COFA Support
 
-A free, independent form-filling website for FSM citizens. Choose a form, enter your details, and download a PDF to print and sign. The site does not renew passports, submit applications, register voters, or request ballots on anyone's behalf.
+A free, independent form-filling website for FSM citizens. Choose a form, enter your details, and download a filled PDF. Election forms also offer a drawn signature; printing and signing by hand remains the default. The site does not renew passports, submit applications, register voters, or request ballots on anyone's behalf.
 
 ## Available forms
 
@@ -8,7 +8,7 @@ A free, independent form-filling website for FSM citizens. Choose a form, enter 
 - **Voter registration:** the application and sworn affidavit from the supplied election form tool.
 - **Absentee ballot application:** the supplied form for the March 2, 2027 Congressional General Election.
 
-Answers are processed in the browser and are not sent to a server or saved between visits. Download your PDF before leaving. No account or analytics. The original COFA logo is retained.
+Answers, signatures and optional document copies are processed in the browser and are not sent to a server or saved between visits. Download your PDF before leaving. No account or analytics. The original COFA logo is retained.
 
 ## Development
 
@@ -47,7 +47,9 @@ GITHUB_PAGES=true npm run build
 - `src/components/Wizard.tsx` and `src/lib/pdf-filler.ts`: existing passport questions and PDF mapping.
 - `public/elections/definitions.mjs`: fields and original coordinate mapping from the supplied election tool.
 - `public/elections/app.mjs`: accessible election fields, conditional answers, download and preview.
-- `public/elections/pdf.mjs`: original-template PDF generation, plus optional print instructions.
+- `public/elections/pdf.mjs`: original-template PDF generation, signature placement and optional document merging.
+- `public/elections/guide.mjs`: legal-size instruction sheets and submission copy.
+- `public/elections/signing.mjs`, `signature.mjs`, `attachments.mjs`: signature UI, alpha cropping and local document preparation.
 - `public/forms/`: election PDF templates extracted unchanged from the supplied HTML.
 - `script/election-forms.test.mjs`: generation, page-size, conditional-answer and overflow tests.
 
@@ -55,4 +57,15 @@ GITHUB_PAGES=true npm run build
 
 Form labels, deadlines and print/submission instructions were checked against the [FSM National Election Office form gallery](https://www.fsmned.fm/PDFgallery.htm) on September 8, 2026, including its [registration form](https://www.fsmned.fm/PDF/RegistrationForm_322027_CongressionalGeneralElection.pdf) and [absentee application](https://www.fsmned.fm/PDF/AbsenteebyMailRequestForm_322027_CongressionalGeneralElection.pdf).
 
-The election workflow fills forms for printing and leaves signatures and dates blank for signing by hand. State-specific email addresses, claimed verbal office advice, electronic signatures, and email packets from the supplied standalone page are not part of this print-focused workflow. Users are directed to their state election office for submission requirements. The PDF's official-use-only fields are left untouched.
+The Pohnpei-specific residence, SS-number and email submission guidance was supplied by the site owner from an email by DeeAnn David, Administrative Clerk at the Pohnpei National Election Office, cc Deputy Director Esmeralda Panuelo. This guidance is not on the public website or in Title 9; preserve it with Pohnpei attribution. Registrants in Chuuk, Kosrae and Yap are directed to confirm with their own offices.
+
+## Election signatures and submission
+
+- **Print & sign by hand** is the default on both forms. The PDF signature and date stay blank.
+- **Draw it** uses pointer events and a canvas sized only when visible. Transparent margins are cropped before embedding the PNG; signatures preserve their aspect ratio, with 9-point padding inside the registration box. A date is included only in Draw mode.
+- **Pohnpei registration:** the signed form, birth certificate copy and one photo ID copy can be emailed to both `election@election.fm` and `deeann.david@election.fm`. Signing on screen allows the form PDF to be emailed directly. The default is **I'll attach them myself**. Merging scanned PDFs or images is a deliberate opt-in; it is reset when leaving the eligible state or signing mode. Images are resized to at most 2000 pixels on the long edge; HEIC is rejected with JPEG conversion guidance; files over 20 MB produce an email-size warning.
+- **Absentee application:** must be printed and submitted by post or hand delivery even with a drawn signature. No email or document-merge flow is offered.
+- The optional instruction sheet uses a legal-size page with numbered steps and a **KEEP THIS PAGE. DO NOT SEND IT.** strip. For signed Pohnpei registrations it downloads separately and is never included in the email packet. Other forms append the sheet for printing. Steps reflect the chosen signing mode and selected state office.
+- The guides include the January 21, 2027 mailed-ballot request deadline and March 2, 2027 ballot-arrival deadline, scanning guidance and Pohnpei contacts. The time-zone note distinguishes the 15-hour lead during US daylight time from 16 hours during standard time.
+
+The PDF's official-use-only fields and original form templates are left untouched. Nothing is submitted by this website.
