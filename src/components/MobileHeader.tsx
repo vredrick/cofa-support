@@ -20,12 +20,12 @@ export default function MobileHeader({ currentStep, onToggleSidebar, onBackToLan
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/cofa-supports-logo.svg`}
-            alt="COFA Supports logo"
+            alt="COFA Support logo"
             width={28}
             height={28}
             className="invert brightness-200"
           />
-          <span className="font-bold text-base">COFA Supports</span>
+          <span className="font-bold text-base">COFA Support</span>
         </button>
         <div className="flex items-center gap-2">
           <span className="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full border border-white/10">

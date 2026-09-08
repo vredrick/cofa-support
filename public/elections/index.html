@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Fill out FSM election forms in your browser, then download, print, and sign your PDF.">
+  <title>Election forms | COFA Support</title>
+  <link rel="icon" href="../favicon.ico">
+  <link rel="stylesheet" href="styles.css">
+  <script src="../vendor/pdf-lib.min.js" defer></script>
+  <script src="app.mjs" type="module"></script>
+</head>
+<body>
+  <header class="site-header"><div class="header-inner">
+    <a class="brand" href="../"><img src="../cofa-supports-logo.svg" width="32" height="32" alt=""><span>COFA Support</span></a>
+    <a href="../#forms">← All forms</a>
+  </div></header>
+  <main class="wrap">
+    <div class="intro"><h1 id="title">Election forms</h1><p id="subtitle">Choose a form to fill out and print.</p></div>
+    <p class="privacy">Your answers stay in this browser. Download your form before leaving; answers are not saved.</p>
+    <div id="picker"></div>
+    <form id="form" hidden novalidate></form>
+    <section id="result" class="result" hidden aria-labelledby="result-title" tabindex="-1">
+      <h2 id="result-title">Your form is ready to print</h2>
+      <p id="result-notes"></p>
+      <div class="actions"><a id="download" class="button" download>Download PDF</a><a id="preview" class="button secondary" target="_blank" rel="noopener">Open PDF to print</a></div>
+      <p class="small">In the PDF viewer, choose Print or press Ctrl+P (Command+P on a Mac). Nothing has been submitted.</p>
+    </section>
+    <p id="error" class="error" role="alert" hidden></p>
+    <footer><p>COFA Support is an independent community tool, unaffiliated with the government. Check submission requirements with your state election office.</p><a href="https://www.fsmned.fm/PDFgallery.htm" target="_blank" rel="noopener">Official election forms and instructions ↗</a></footer>
+    <noscript>Enable JavaScript to fill out a form, or <a href="../forms/fsm-registration.pdf">download the blank registration form</a> or <a href="../forms/fsm-absentee.pdf">absentee form</a> to fill by hand.</noscript>
+  </main>
+  <div class="action-bar" id="action-bar" hidden><label><input type="checkbox" id="guide" checked> Include print instructions</label><button class="button" type="submit" form="form" id="generate">Create filled PDF</button></div>
+</body>
+</html>

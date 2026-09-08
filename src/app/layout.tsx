@@ -21,14 +21,13 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'COFA Supports',
-  description: 'Digital support services for COFA nations — FSM, RMI, and Palau. Complete forms, generate pre-filled PDFs, and access resources for COFA citizens.',
+  title: 'COFA Support | Fill and print FSM forms',
+  description: 'Free form-filling tools for FSM citizens. Choose a passport or election form, fill in your details, and download a PDF to print and sign.',
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({

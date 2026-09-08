@@ -165,8 +165,8 @@ export default function ReviewStep({ data, onEdit, onBack }: ReviewStepProps) {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-4xl font-bold tracking-tight text-ink">Your Application is <span className="font-serif italic text-ocean">Ready</span></h2>
-          <p className="text-lg text-muted mt-2">Please review your completed passport application PDF below.</p>
+          <h2 className="text-4xl font-bold tracking-tight text-ink">Your form is <span className="font-serif italic text-ocean">ready to print</span></h2>
+          <p className="text-lg text-muted mt-2">Review your filled PDF, then download, print, and sign it. Submit it yourself to the appropriate office.</p>
         </div>
 
         <iframe

@@ -52,13 +52,13 @@ export default function Sidebar({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/cofa-supports-logo.svg`}
-            alt="COFA Supports logo"
+            alt="COFA Support logo"
             width={40}
             height={40}
             className="flex-shrink-0"
           />
           <div className="text-left">
-            <h1 className="text-lg font-bold text-ink leading-tight">COFA Supports</h1>
+            <h1 className="text-lg font-bold text-ink leading-tight">COFA Support</h1>
             <p className="text-xs text-muted">FSM Passport Application · Form 500B</p>
           </div>
         </button>
@@ -72,7 +72,7 @@ export default function Sidebar({
             className="flex items-center gap-1 mt-3 px-3 py-2 text-sm font-semibold text-ocean bg-ocean/5 hover:bg-ocean/10 border border-ocean/15 rounded-lg transition-all duration-200"
           >
             <span className="material-symbols-outlined text-[18px]">home</span>
-            Back to Home
+            All forms
           </button>
         )}
       </div>

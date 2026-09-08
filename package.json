@@ -1,5 +1,5 @@
 {
-  "name": "cofa-passport-temp",
+  "name": "cofa-support",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,8 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "vitest run && node --test script/election-forms.test.mjs",
+    "test:watch": "vitest",
+    "predev": "node script/prepare-static.mjs",
+    "prebuild": "node script/prepare-static.mjs"
   },
   "dependencies": {
     "next": "14.2.35",

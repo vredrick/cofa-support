@@ -1,99 +1,58 @@
-# COFA Supports
+# COFA Support
 
-A privacy-first web application providing digital support services for citizens of Compact of Free Association (COFA) nations. Currently helps complete passport applications digitally. All data processing happens entirely in the browser -- nothing is sent to a server.
+A free, independent form-filling website for FSM citizens. Choose a form, enter your details, and download a PDF to print and sign. The site does not renew passports, submit applications, register voters, or request ballots on anyone's behalf.
 
-## Supported Nations
+## Available forms
 
-| Nation | Form | Status |
-|--------|------|--------|
-| Federated States of Micronesia (FSM) | Form 500B | Available |
-| Republic of the Marshall Islands (RMI) | TBD | Planned |
-| Republic of Palau | TBD | Planned |
+- **Passport application:** the existing guided FSM Form 500B filler, with review and PDF download.
+- **Voter registration:** the application and sworn affidavit from the supplied election form tool.
+- **Absentee ballot application:** the supplied form for the March 2, 2027 Congressional General Election.
 
-## How It Works
+Answers are processed in the browser and are not sent to a server or saved between visits. Download your PDF before leaving. No account or analytics. The original COFA logo is retained.
 
-1. Applicant fills out a multi-step form in their browser
-2. The app validates all required fields in real time
-3. On submit, it fills the official PDF template client-side using [pdf-lib](https://pdf-lib.js.org/)
-4. The completed PDF is previewed, then downloaded or shared -- ready to print and submit
+## Development
 
-No account, no server, no data collection.
+Use Node 22 (the VPS has 22.18.0 installed).
 
-## Tech Stack
-
-- **Next.js 14** (static export) -- React framework with App Router
-- **TypeScript** -- type-safe codebase
-- **Tailwind CSS** -- utility-first styling with custom ocean/gold theme
-- **pdf-lib** -- client-side PDF manipulation
-
-## Getting Started
-
-```bash
-npm install
+```sh
+npm ci
 npm run dev
+npm run lint
+npm test
+GITHUB_PAGES=true npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+`predev` and `prebuild` copy the installed, lockfile-pinned pdf-lib browser bundle and its license into `public/vendor/`. No external PDF-library CDN is needed. Generated vendor files are excluded from Git.
 
-### Build for Production
+## Hosting
 
-```bash
-npm run build
-```
+- Repository: https://github.com/vredrick/cofa-support
+- Website: https://vredrick.github.io/cofa-support/
+- VPS checkout: `/home/vredrick/cofa-support`
+- The existing GitHub Actions workflow builds a Next.js static export and deploys `out/` to GitHub Pages on a push to `main`.
+- `next.config.mjs` sets `/cofa-support` as the production base path. Public asset URLs must respect this path. Election pages use relative URLs so they work both locally and under GitHub Pages.
 
-Outputs a fully static site to `out/` -- deploy anywhere (Vercel, Netlify, S3, GitHub Pages, etc.).
+## Adding another form
 
-## Project Structure
+1. Add its original PDF template to `public/forms/`.
+2. Build its field definitions and PDF mapping. Simple election-style forms can use the reusable engine in `public/elections/`; more involved forms can have their own React flow.
+3. Add a title, description, category, and link in `src/data/forms.ts`. Only list forms that are available to fill.
+4. Check the source instructions, test conditional answers and PDF output, and verify the download on mobile and desktop.
 
-```
-src/
-  app/
-    page.tsx            # Entry point
-    layout.tsx          # Root layout, metadata, viewport
-    globals.css         # Tailwind layers + component classes
-  components/
-    Header.tsx          # FSM branding header
-    PrivacyNotice.tsx   # Dismissible privacy banner
-    ProgressBar.tsx     # Step indicator (5 steps)
-    Wizard.tsx          # Form state + step navigation
-    steps/
-      PassportTypeStep.tsx    # Step 1: Ordinary / Official / Diplomatic
-      ApplicantInfoStep.tsx   # Step 2: Full applicant details
-      ParentInfoStep.tsx      # Steps 3-4: Father & Mother info
-      ReviewStep.tsx          # Step 5: Review, generate, download PDF
-    ui/
-      TextInput.tsx     # Text input with uppercase, error display
-      DateInput.tsx     # Auto-formatted MM/DD/YYYY input
-      RadioGroup.tsx    # Stacked or inline radio buttons
-      YesNoToggle.tsx   # Binary yes/no toggle
-  lib/
-    field-mapping.ts    # PDF form field ID constants
-    pdf-filler.ts       # PDF generation (fill + flatten)
-    validation.ts       # Per-step validation rules
-  types/
-    form.ts             # TypeScript types, interfaces, initial values
-public/
-  AmendedPassportApplication0001.pdf   # FSM Form 500B template
-```
+## Key files
 
-## PDF Generation Details
+- `src/data/forms.ts`: homepage form catalog.
+- `src/components/LandingPage.tsx`: simple form library.
+- `src/app/page.tsx`: homepage and passport wizard, including `?form=passport` links.
+- `src/components/Wizard.tsx` and `src/lib/pdf-filler.ts`: existing passport questions and PDF mapping.
+- `public/elections/definitions.mjs`: fields and original coordinate mapping from the supplied election tool.
+- `public/elections/app.mjs`: accessible election fields, conditional answers, download and preview.
+- `public/elections/pdf.mjs`: original-template PDF generation, plus optional print instructions.
+- `public/forms/`: election PDF templates extracted unchanged from the supplied HTML.
+- `script/election-forms.test.mjs`: generation, page-size, conditional-answer and overflow tests.
 
-The app fills the official government PDF template and produces a **static, non-editable PDF** that renders identically in all viewers (Chrome, Safari, Mac Preview, Adobe Reader, etc.).
+## Election sources
 
-- **Text fields**: drawn directly on the page via `page.drawText()` at 8pt Helvetica with auto-shrink — bypasses form-field font-size limitations for reliable rendering across all viewers
-- **Checkboxes**: drawn directly on the page as vector checkmarks (Chrome's PDF viewer does not render form-field checkbox appearances)
-- **Field coordinates**: mapped from the template's AcroForm widget rectangles (see `FIELD_POS` in `pdf-filler.ts`)
+Form labels, deadlines and print/submission instructions were checked against the [FSM National Election Office form gallery](https://www.fsmned.fm/PDFgallery.htm) on September 8, 2026, including its [registration form](https://www.fsmned.fm/PDF/RegistrationForm_322027_CongressionalGeneralElection.pdf) and [absentee application](https://www.fsmned.fm/PDF/AbsenteebyMailRequestForm_322027_CongressionalGeneralElection.pdf).
 
-## Adding a New Nation
-
-To add RMI or Palau support:
-
-1. Add the nation's official passport application PDF template to `public/`
-2. Create a new field mapping in `src/lib/field-mapping.ts` (inspect the PDF's AcroForm field IDs)
-3. Adjust types in `src/types/form.ts` if the form structure differs
-4. Add nation-specific validation rules in `src/lib/validation.ts`
-5. Update the wizard steps if the form has different sections
-
-## License
-
-Private -- all rights reserved.
+The election workflow fills forms for printing and leaves signatures and dates blank for signing by hand. State-specific email addresses, claimed verbal office advice, electronic signatures, and email packets from the supplied standalone page are not part of this print-focused workflow. Users are directed to their state election office for submission requirements. The PDF's official-use-only fields are left untouched.

@@ -47,3 +47,6 @@ test_*.pdf
 
 # skill files
 *.skill
+
+# Browser PDF library copied from the locked npm package during dev/build
+/public/vendor/

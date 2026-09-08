@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import PrivacyNotice from '@/components/PrivacyNotice';
-import Wizard from '@/components/Wizard';
+const Wizard = dynamic(() => import('@/components/Wizard'), { loading: () => <p role="status">Loading passport form…</p> });
 import Sidebar from '@/components/Sidebar';
 import MobileHeader from '@/components/MobileHeader';
 import LandingPage from '@/components/LandingPage';
@@ -31,10 +32,20 @@ export default function Home() {
   const handleStartApplication = useCallback(() => {
     setView('wizard');
     setCurrentStep(0);
+    setCompletedSteps(new Set());
+    setMobileOpen(false);
+    window.history.replaceState(null, '', '?form=passport');
   }, []);
 
   const handleBackToLanding = useCallback(() => {
     setView('landing');
+    setCompletedSteps(new Set());
+    setMobileOpen(false);
+    window.history.replaceState(null, '', window.location.pathname);
+  }, []);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('form') === 'passport') setView('wizard');
   }, []);
 
   // Scroll to top on step change or view change
@@ -64,6 +75,7 @@ export default function Home() {
       />
       <main className="flex-1">
         <div className="max-w-[800px] mx-auto px-4 sm:px-8 py-8 space-y-6">
+          <p className="text-sm text-muted">Fill out FSM Form 500B, then download, print, and sign it. This tool prepares your form; it does not submit or renew a passport.</p>
           <PrivacyNotice />
           <Wizard
             currentStep={currentStep}

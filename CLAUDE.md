@@ -1,12 +1,12 @@
-# COFA Supports
+# COFA Support
 
-## Overview
+## Current purpose
 
-A privacy-first web application that helps citizens of COFA (Compact of Free Association) nations complete passport application forms digitally. The app guides users through a multi-step wizard, collects form data, and generates a pre-filled PDF that can be printed and submitted to the appropriate passport office.
+A form library for FSM citizens: choose a form, fill it out, download, print, and sign. The site is an independent community tool and does not submit applications or renew passports. Keep the original logo in `public/cofa-supports-logo.svg`.
 
-Currently supports **FSM (Federated States of Micronesia) Form 500B**. RMI (Republic of the Marshall Islands) and Palau support are planned.
+The homepage catalog is `src/data/forms.ts`; `LandingPage.tsx` renders three simple form rows. Passport Form 500B uses the existing React wizard at `?form=passport`. The election fillers at `public/elections/?form=registration` and `?form=absentee` reuse the supplied templates and field coordinates. Their answers stay in memory, and signatures are completed by hand after printing. The election PDF library is copied from the locked npm dependency by `script/prepare-static.mjs` before development and builds. Read README.md for current setup, source links, and instructions for adding forms.
 
-All data processing happens entirely in the browser. No data is ever sent to a server.
+The existing passport implementation notes below remain useful, but earlier nation-selector and marketing landing-page descriptions are historical. Do not reintroduce them.
 
 ## Technology Stack
 
@@ -19,7 +19,7 @@ All data processing happens entirely in the browser. No data is ever sent to a s
 - **React:** 18.x (all client components, no server components)
 - **Linting:** ESLint with next/core-web-vitals and next/typescript
 - **Hosting:** GitHub Pages via GitHub Actions (static deploy)
-- **Testing:** None installed yet
+- **Testing:** Vitest plus election PDF tests (`npm test`)
 
 ## Commands
 
@@ -29,14 +29,14 @@ npm run build     # Build static export to out/
 npm run lint      # Run ESLint
 npm run start     # Start production server (not typically used; app is static)
 
-# GitHub Pages build (sets basePath to /cofa-passport)
+# GitHub Pages build (sets basePath to /cofa-support)
 GITHUB_PAGES=true npm run build
 ```
 
 ## Project Structure
 
 ```
-cofa-passport/
+cofa-support/
 ├── CLAUDE.md                 # This file
 ├── .github/workflows/
 │   └── deploy.yml            # GitHub Actions: build + deploy to GitHub Pages
@@ -93,7 +93,7 @@ cofa-passport/
 - **Fully client-side:** Every component uses `'use client'`. There are no server components, no API routes, and no server-side data fetching. The build output (`out/`) is a set of static HTML/JS/CSS files.
 - **Privacy-first:** The PDF template is fetched from `public/`, filled in-browser with pdf-lib, and downloaded/shared directly. Nothing touches a server.
 - **Static export:** `next.config.mjs` sets `output: 'export'` and `images: { unoptimized: true }`. The app can be hosted on any static file server (S3, GitHub Pages, Netlify, etc.).
-- **GitHub Pages deploy:** When `GITHUB_PAGES=true` is set, `next.config.mjs` adds `basePath: '/cofa-passport'` and `assetPrefix: '/cofa-passport/'`. The `NEXT_PUBLIC_BASE_PATH` env var is exposed so runtime asset fetches (PDF template, passport images) use the correct subpath. The GitHub Actions workflow in `.github/workflows/deploy.yml` handles build and deploy automatically on push to `main`.
+- **GitHub Pages deploy:** When `GITHUB_PAGES=true` is set, `next.config.mjs` adds `basePath: '/cofa-support'` and `assetPrefix: '/cofa-support/'`. The `NEXT_PUBLIC_BASE_PATH` env var is exposed so runtime asset fetches (PDF template, passport images) use the correct subpath. The GitHub Actions workflow in `.github/workflows/deploy.yml` handles build and deploy automatically on push to `main`.
 
 ### View Architecture
 
@@ -276,7 +276,7 @@ Custom values added to `borderWidth` in `tailwind.config.ts` (e.g., `'3': '3px'`
 - No `next/image` optimization (images are unoptimized)
 - The PDF template must be in `public/` and is fetched at runtime via `fetch()`
 - All routing is client-side; there is one page (`/`) with a view state toggle (landing vs wizard)
-- **BasePath handling:** When deployed to GitHub Pages, all assets live under `/cofa-passport/`. Next.js handles `basePath` for JS/CSS bundles and `<Link>` components automatically. For raw `<img>` tags and `fetch()` calls to `public/` files, you must prefix with `process.env.NEXT_PUBLIC_BASE_PATH` (see `LandingPage.tsx` and `pdf-filler.ts` for examples). Locally this env var is empty, so paths resolve to `/` as usual.
+- **BasePath handling:** When deployed to GitHub Pages, all assets live under `/cofa-support/`. Next.js handles `basePath` for JS/CSS bundles and `<Link>` components automatically. For raw `<img>` tags and `fetch()` calls to `public/` files, you must prefix with `process.env.NEXT_PUBLIC_BASE_PATH` (see `LandingPage.tsx` and `pdf-filler.ts` for examples). Locally this env var is empty, so paths resolve to `/` as usual.
 
 ### Share API
 
