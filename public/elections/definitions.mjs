@@ -40,13 +40,13 @@ export const FORMS = [
       {k:"dob",    l:"Date of birth", t:"date", at:{x:191.3, w:108.5, bot:256.5, size:11}}
     ]},
     {h:"Your polling place", lede:"Where you are registered in the FSM — not where you live now.",
-     hint:"Box # and ED # are printed on your voter ID card. If you don't know them, leave them blank and ask your election office — don't guess.",
+     hint:"Box # is on your voter ID card; it is not the district number. Leave it blank if you do not know it.",
      infoFor:"state", fields:[
+      {k:"state",   l:"State", t:"select", options:STATES,      at:{x:423.3, w:90.1,  bot:305.8, size:11}},
+      {k:"ed", l:"Election district (ED #)", t:"district", stateKey:"state", at:{x:351.2, w:54.2,  bot:305.8, size:11}},
       {k:"box",     l:"Box #", t:"text", cols:2, im:"numeric", info:"The ballot box number for your polling place, printed on your voter ID card. It is not your mailing P.O. box. If you do not have a card yet, leave it blank and ask your election office.", at:{x:63.0,  w:30.1,  bot:305.8, size:11}},
-      {k:"ed",      l:"ED #",  t:"text", cols:2, im:"numeric", info:"Your Election District. FSM congressional districts are single-member districts within your state: Chuuk has 5, Pohnpei has 3, Yap has 1 and Kosrae has 1. If your state has only one, it is ED 1. Otherwise the number is printed on your voter ID card. If you are not sure, leave it blank and ask your election office rather than guessing — a wrong district can send your ballot to the wrong race.", at:{x:351.2, w:54.2,  bot:305.8, size:11}},
       {k:"village", l:"Village", t:"text", ph:"e.g. Palikir", info:"The village where you are registered in the FSM, not where you live now. Use the name your election office would recognise on official records.", at:{x:99.0,  w:120.2, bot:305.8, size:11}},
       {k:"muni",    l:"Municipality", t:"text", ph:"e.g. Sokehs", at:{x:243.1, w:96.4, bot:305.8, size:11}},
-      {k:"state",   l:"State", t:"select", options:STATES,      at:{x:423.3, w:90.1,  bot:305.8, size:11}}
     ]},
     {h:"Where to send your ballot", lede:"Your blank ballot is posted to this address. Check it twice.", fields:[
       {k:"street",   l:"Street or P.O. Box", t:"text", ac:"street-address", at:{x:63.0,  w:156.2, bot:392.2, size:11}},
@@ -107,17 +107,17 @@ export const FORMS = [
       ]}
     ]},
     {h:"5. SS # and Hosp. #",
-     ask:"Citizens registering from abroad can leave both fields blank. The National Election Office advises that a United States Social Security number should not be entered here.",
+     ask:"Enter your FSM Social Security number if you have one. If you do not have an FSM number, leave SS # blank. Do not enter a United States Social Security number.",
      fields:[
-      {k:"ss",   l:"SS #",     t:"text", cols:2, at:{x:304.6,w:88.6,bot:324.9,size:10}},
+      {k:"ss",   l:"FSM SS #",     t:"text", cols:2, at:{x:304.6,w:88.6,bot:324.9,size:10}},
       {k:"hosp", l:"Hosp. #",  t:"text", cols:2, at:{x:456.6,w:82.5,bot:324.9,size:10}}
     ]},
     {h:"6. Polling place", lede:"Where you are registering in the FSM.",
-     hint:"If you don't know your ED #, leave it blank and ask — don't guess.", fields:[
+     hint:"Choose the listed place that covers your home residence. Enter your village and municipality as they appear in your official records.", fields:[
+      {k:"state",   l:"State", t:"select", options:STATES, at:{x:487,w:67,bot:350.4,size:11}},
+      {k:"ed", l:"Election district (ED #)", t:"district", stateKey:"state", at:{x:415,w:65,bot:350.4,size:11}},
       {k:"village", l:"Village", t:"text", ph:"e.g. Palikir", info:"The village where you are registered in the FSM, not where you live now. Use the name your election office would recognise on official records.", at:{x:150,w:150,bot:350.4,size:11}},
       {k:"muni",    l:"Municipality", t:"text", ph:"e.g. Sokehs", at:{x:305,w:105,bot:350.4,size:11}},
-      {k:"ed",      l:"ED #",  t:"text", cols:2, im:"numeric", info:"Your Election District. FSM congressional districts are single-member districts within your state: Chuuk has 5, Pohnpei has 3, Yap has 1 and Kosrae has 1. If your state has only one, it is ED 1. Otherwise the number is printed on your voter ID card. If you are not sure, leave it blank and ask your election office rather than guessing — a wrong district can send your ballot to the wrong race.", at:{x:415,w:65,bot:350.4,size:11}},
-      {k:"state",   l:"State", t:"select", cols:2, options:STATES, at:{x:487,w:67,bot:350.4,size:11}}
     ]},
     {h:"7. Current mailing address", lede:"Where you live now. Your voter ID card and correspondence go here.", fields:[
       {k:"street", l:"P.O. Box # or street no.", t:"text", ph:"123 Main St, Apt 4", ac:"street-address", at:{x:206,w:139,bot:381.4,size:10}},
@@ -130,10 +130,10 @@ export const FORMS = [
         {v:"y", l:"Yes", box:{x:327.0,bot:417.6}},
         {v:"n", l:"No",  box:{x:399.8,bot:418.4}}
       ]},
+      {k:"pstate",   l:"Prior state", t:"select", options:STATES, showIf:{k:"prev",eq:"y"}, at:{x:495,w:38, bot:453.8,size:10}},
+      {k:"ped",      l:"Prior ED #", t:"district", stateKey:"pstate", showIf:{k:"prev",eq:"y"}, at:{x:387,w:103,bot:453.8,size:10}},
       {k:"pvillage", l:"Prior village", t:"text", showIf:{k:"prev",eq:"y"}, at:{x:80, w:160,bot:453.8,size:10}},
       {k:"pmuni",    l:"Prior municipality", t:"text", showIf:{k:"prev",eq:"y"}, at:{x:245,w:137,bot:453.8,size:10}},
-      {k:"ped",      l:"Prior ED #", t:"text", cols:2, showIf:{k:"prev",eq:"y"}, at:{x:387,w:103,bot:453.8,size:10}},
-      {k:"pstate",   l:"Prior state", t:"text", cols:2, showIf:{k:"prev",eq:"y"}, at:{x:495,w:38, bot:453.8,size:10}},
       {k:"pname",    l:"Under the name of", t:"text", showIf:{k:"prev",eq:"y"}, at:{x:168.2,w:170.7,bot:484.4,size:11}}
     ]},
     {h:"9–12. Declarations", lede:"Answer each honestly — this is a sworn affidavit.", fields:[

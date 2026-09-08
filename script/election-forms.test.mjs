@@ -6,7 +6,37 @@ import { inkBounds, createSignaturePad } from '../public/elections/signature.mjs
 import { imageDimensions, attachmentKind } from '../public/elections/attachments.mjs';
 import { guideContent } from '../public/elections/guide.mjs';
 import { FORMS } from '../public/elections/definitions.mjs';
+import { DISTRICTS, districtChoices, districtForChoice } from '../public/elections/districts.mjs';
 import { createElectionPdf, createInstructionPdf, signaturePlacement, allFields } from '../public/elections/pdf.mjs';
+
+test('Official district choices preserve every listed place and ambiguous Yap names', () => {
+  assert.deepEqual(Object.fromEntries(Object.entries(DISTRICTS).map(([state, groups]) => [state, groups.map(g => g.length)])), {
+    Chuuk: [11,3,5,8,13], Kosrae: [6], Pohnpei: [5,2,4], Yap: [10,8,6,4,3],
+  });
+  assert.equal(districtForChoice('Pohnpei', '1:Sokehs'), '1');
+  assert.equal(districtForChoice('Chuuk', '2:Weno'), '2');
+  assert.equal(districtForChoice('Kosrae', '1:Walung'), '1');
+  assert.equal(districtForChoice('Yap', '2:Falalop'), '2');
+  assert.equal(districtForChoice('Yap', '3:Falalop'), '3');
+  assert.equal(districtForChoice('Yap', '5:Lamotrek'), '5');
+  assert.equal(districtForChoice('Chuuk', '1:Sokehs'), '');
+  assert.deepEqual(districtChoices(''), []);
+});
+
+test('Both PDFs accept official ED numbers and reject districts from the wrong state', async () => {
+  for (const form of FORMS) {
+    const template = await readFile(new URL(`../public/forms/fsm-${form.id}.pdf`, import.meta.url));
+    for (const state of Object.keys(DISTRICTS)) {
+      const ed = String(DISTRICTS[state].length);
+      const bytes = await createElectionPdf(form, {state, ed}, template, false, PDFLib);
+      assert.equal((await PDFLib.PDFDocument.load(bytes)).getPageCount(), 1);
+    }
+    await assert.rejects(createElectionPdf(form, {state:'Kosrae', ed:'5'}, template, false, PDFLib), /Choose Election district/);
+    if (form.id === 'registration') {
+      await assert.rejects(createElectionPdf(form, {prev:'y', pstate:'Kosrae', ped:'5'}, template, false, PDFLib), /Choose Prior ED/);
+    }
+  }
+});
 
 for (const form of FORMS) {
   test(`${form.id}: fills the legal template and optionally appends print instructions`, async () => {

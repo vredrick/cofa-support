@@ -1,4 +1,5 @@
 import { drawInstructionPage, isEmailRegistration, REGISTRATION_EMAILS } from './guide.mjs';
+import { validDistrict } from './districts.mjs';
 export const allFields = form => form.sections.flatMap(section => section.fields || []).filter(field => field.k);
 export const formatDate = iso => { if (!iso) return ''; const [y, m, d] = iso.split('-'); return `${m}/${d}/${y}`; };
 const applies = (field, values) => !field.showIf || values[field.showIf.k] === field.showIf.eq;
@@ -56,6 +57,9 @@ export async function createElectionPdf(form, values, template, includeGuide, PD
   for (const field of allFields(form)) {
     if (!applies(field, values)) continue;
     const value = values[field.k];
+    if (field.t === 'district' && value && !validDistrict(values[field.stateKey], value)) {
+      throw new Error(`Choose ${field.l} again for the selected state.`);
+    }
     if (field.t === 'cards' || field.t === 'seg') {
       const selected = field.options.find(option => option.v === value);
       if (selected?.box) tick(selected.box);

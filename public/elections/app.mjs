@@ -2,6 +2,7 @@ import { FORMS, OFFICES } from './definitions.mjs';
 import { createElectionPdf, createInstructionPdf, printNotes } from './pdf.mjs';
 import { createSigningSection } from './signing.mjs';
 import { EMAIL_WARNING_BYTES } from './attachments.mjs';
+import { districtChoices, districtForChoice, DISTRICT_SOURCE } from './districts.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, className, text) => {
@@ -37,6 +38,23 @@ function changed(key, value) {
   refresh();
 }
 function refresh() {
+  document.querySelectorAll('select[data-district-state]').forEach(input => {
+    const state = values[input.dataset.districtState] || '';
+    if (input.dataset.loadedState === state) return;
+    input.dataset.loadedState = state;
+    values[input.name] = '';
+    input.replaceChildren();
+    const empty = el('option', '', state ? 'Choose your home place…' : 'Choose a state first');
+    empty.value = ''; input.append(empty); input.disabled = !state;
+    let group;
+    for (const choice of districtChoices(state)) {
+      if (group?.label !== `ED ${choice.ed}`) {
+        group = el('optgroup'); group.label = `ED ${choice.ed}`; input.append(group);
+      }
+      const option = el('option', '', `${choice.place} — ED ${choice.ed}`);
+      option.value = choice.value; group.append(option);
+    }
+  });
   signing?.refresh(values);
   $('guide-label').textContent = signing?.email ? 'Create a separate instruction sheet' : 'Include print instructions';
   document.querySelectorAll('[data-condition]').forEach(node => { node.hidden = !matches(JSON.parse(node.dataset.condition)); });
@@ -75,9 +93,11 @@ function fieldNode(field, groupLabel) {
   } else {
     node = el('div', 'field');
     const label = el('label', '', field.l || groupLabel); label.htmlFor = `field-${field.k}`;
-    const input = el(field.t === 'select' ? 'select' : 'input');
+    const input = el(field.t === 'select' || field.t === 'district' ? 'select' : 'input');
     input.id = label.htmlFor; input.name = field.k;
-    if (field.t === 'select') {
+    if (field.t === 'district') {
+      input.dataset.districtState = field.stateKey;
+    } else if (field.t === 'select') {
       const empty = el('option', '', 'Choose…'); empty.value = ''; input.append(empty);
       for (const option of field.options) { const item = el('option', '', option); item.value = option; input.append(item); }
     } else {
@@ -87,8 +107,16 @@ function fieldNode(field, groupLabel) {
       if (field.im) input.inputMode = field.im;
       if (field.max) input.maxLength = field.max;
     }
-    input.addEventListener('input', () => changed(field.k, input.value));
+    input.addEventListener(input.tagName === 'SELECT' ? 'change' : 'input', () =>
+      changed(field.k, field.t === 'district' ? districtForChoice(values[field.stateKey], input.value) : input.value));
     node.append(label, input);
+    if (field.t === 'district') {
+      const help = el('p', 'hint', 'Places are grouped by electoral division. Your selection fills only the ED number on the PDF. ');
+      help.id = `${input.id}-help`; input.setAttribute('aria-describedby', help.id);
+      const source = el('a', '', 'View the official district list');
+      source.href = DISTRICT_SOURCE; source.target = '_blank'; source.rel = 'noopener';
+      help.append(source); node.append(help);
+    }
     if (field.info) {
       const details = el('details', 'info'); details.append(el('summary', '', `About ${field.l || 'this field'}`), el('p', '', field.info)); node.append(details);
     }
