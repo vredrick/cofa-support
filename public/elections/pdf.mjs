@@ -1,4 +1,4 @@
-import { drawInstructionPage, isEmailRegistration, POHNPEI_EMAILS } from './guide.mjs';
+import { drawInstructionPage, isEmailRegistration, REGISTRATION_EMAILS } from './guide.mjs';
 export const allFields = form => form.sections.flatMap(section => section.fields || []).filter(field => field.k);
 export const formatDate = iso => { if (!iso) return ''; const [y, m, d] = iso.split('-'); return `${m}/${d}/${y}`; };
 const applies = (field, values) => !field.showIf || values[field.showIf.k] === field.showIf.eq;
@@ -7,12 +7,12 @@ export function printNotes(form, values = {}, signed = false, merged = false) {
   if (form.id === 'registration') {
     const email = isEmailRegistration(form, values, signed);
     const action = email
-      ? 'No printing needed for Pohnpei. Check your drawn signature and date in the PDF.'
+      ? 'No printing needed. Check your drawn signature and date in the PDF.'
       : signed
         ? 'Print on legal paper (8.5 × 14 in), or choose Fit to page. Check the signature and date already on the form; the signature must stay inside the box without touching its borders.'
         : 'Print on legal paper (8.5 × 14 in), or choose Fit to page. Sign inside the signature box without touching its borders and write the date.';
-    const route = `Pohnpei accepts completed registrations by email at ${POHNPEI_EMAILS.join(' and ')}. Send ${email ? 'your signed PDF' : 'a scanned copy of the signed form'} plus a birth certificate and one photo ID. Send copies only.`;
-    return `${action} ${route} ${email && merged ? 'Your selected document copies are included in the PDF. Check that all required documents are there.' : 'Attach the document copies to the email yourself.'} Keep the instruction sheet; do not send it. Registrants in Chuuk, Kosrae or Yap should confirm with their own office.`;
+    const route = `Registration email contacts: ${REGISTRATION_EMAILS.join(' and ')}. Send ${email ? 'your signed PDF' : 'a scanned copy of the signed form'} plus a birth certificate and one photo ID. Send copies only.`;
+    return `${action} ${route} ${email && merged ? 'Your selected document copies are included in the PDF. Check that all required documents are there.' : 'Attach the document copies to the email yourself.'} Keep the instruction sheet; do not send it.`;
   }
   return `Print on legal paper (8.5 × 14 in), or choose Fit to page. ${signed ? 'Check the signature and date already on your form.' : 'Sign and date it by hand.'} Personally mail or deliver it to your state election office before the deadline printed for your request type. Do not email this form.`;
 }
@@ -74,7 +74,7 @@ export async function createElectionPdf(form, values, template, includeGuide, PD
     draw(formatDate(options.signature.date), form.dateAt, 'Signature date');
   }
   const email = isEmailRegistration(form, values, signed);
-  if (options.attachments?.length && !email) throw new Error('Document merging is only available for signed Pohnpei registration forms.');
+  if (options.attachments?.length && !email) throw new Error('Document merging is only available when the signed-registration email option is shown.');
   // A sendable email packet must never contain the KEEP / DO NOT SEND guide.
   if (includeGuide && !email) drawInstructionPage(doc, form, values, signed, {font,bold}, PDFLib);
   for (const attachment of options.attachments || []) {

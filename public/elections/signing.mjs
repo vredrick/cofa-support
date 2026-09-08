@@ -32,7 +32,7 @@ export function createSigningSection(form, onChange) {
   let values = {}, mode = 'print', email = false, merging = false, attachments = [], processing = false, batch = 0;
   if (form.id === 'registration') {
     const section = document.createElement('div'); section.id = 'email-options'; section.hidden = true;
-    section.innerHTML = `<div class="note"><b>Pohnpei: you can skip printing.</b> Email the signed PDF with a copy of your birth certificate and one photo ID to both <a href="mailto:election@election.fm">election@election.fm</a> and <a href="mailto:deeann.david@election.fm">deeann.david@election.fm</a>. Check that the government seal and every word in the scans are legible.</div>
+    section.innerHTML = `<div class="note"><b>You can skip printing.</b> Email the signed PDF with a copy of your birth certificate and one photo ID to both <a href="mailto:election@election.fm">election@election.fm</a> and <a href="mailto:deeann.david@election.fm">deeann.david@election.fm</a>. Check that the government seal and every word in the scans are legible.</div>
       <fieldset class="choice-group"><legend>Your birth certificate and photo ID</legend>
         <label class="choice"><input type="radio" name="attachment-mode" value="separate" checked><span><b>I'll attach them myself</b><small>Download the signed form and attach your document copies to the email yourself.</small></span></label>
         <label class="choice"><input type="radio" name="attachment-mode" value="merge"><span><b>Add copies to this PDF</b><small>Optional. Choose your scans to combine with the signed registration.</small></span></label>

@@ -47,17 +47,9 @@ function refresh() {
     address.textContent = OFFICES[values.state] ? `Mailing address printed on the form: ${OFFICES[values.state].join(', ')}` : '';
   }
 }
-function guidanceNote(html, state) {
-  const note = copy('note', html);
-  if (state) {
-    note.prepend(el('strong', 'guidance-label', `${state} election office guidance`));
-    note.append(el('p', 'guidance-scope', 'Registrants in Chuuk, Kosrae or Yap should confirm with their own election office.'));
-  }
-  return note;
-}
 function fieldNode(field, groupLabel) {
   if (field.q) return el('p', 'question', field.q);
-  if (field.askAfter) return guidanceNote(field.askAfter, field.guidanceState);
+  if (field.askAfter) return copy('note', field.askAfter);
   if (field.warnIf) { const node = copy('note', field.html); node.dataset.warn = 'true'; node.hidden = true; return node; }
   if (field.askIf) { const node = copy('note', field.html); node.dataset.condition = JSON.stringify(field.askIf); node.hidden = true; return node; }
   let node;
@@ -118,7 +110,7 @@ function showForm() {
     const host = el('section', 'section');
     if (section.h) host.append(el('h2', '', section.h));
     if (section.lede) host.append(el('p', 'lede', section.lede));
-    if (section.ask) host.append(guidanceNote(section.ask, section.guidanceState));
+    if (section.ask) host.append(copy('note', section.ask));
     let groupLabel = section.h || 'Choose an answer';
     let columns = null;
     for (const field of section.fields || []) {

@@ -1,9 +1,8 @@
 import { OFFICES } from './definitions.mjs';
-export const POHNPEI_EMAILS = ['election@election.fm', 'deeann.david@election.fm'];
-export const isEmailRegistration = (form, values, signed = false) => form.id === 'registration' && values.state === 'Pohnpei' && signed;
+export const REGISTRATION_EMAILS = ['election@election.fm', 'deeann.david@election.fm'];
+export const isEmailRegistration = (form, values, signed = false) => form.id === 'registration' && Object.hasOwn(OFFICES, values.state) && signed;
 
 export function guideContent(form, values, signed = false) {
-  const pohnpei = values.state === 'Pohnpei';
   const email = isEmailRegistration(form, values, signed);
   const office = OFFICES[values.state];
   const scan = [
@@ -14,15 +13,16 @@ export function guideContent(form, values, signed = false) {
   if (form.id === 'registration') {
     return {
       title: 'Your registration, step by step',
-      subtitle: pohnpei ? 'Pohnpei National Election Office guidance' : 'Pohnpei guidance - confirm with your own state office',
+      subtitle: 'Registration instructions',
       steps: [
-        { title: email ? 'Check the filled form - no printing needed' : 'Print your filled form', body: [email ? 'Review every answer in your signed PDF. You can email the form directly to Pohnpei; keep this instruction sheet separate.' : 'Use legal paper (8.5 x 14 in). If using letter paper, choose Fit to page and make sure every word is readable. Keep this instruction page.'] },
+        { title: email ? 'Check the filled form - no printing needed' : 'Print your filled form', body: [email ? 'Review every answer in your signed PDF. You can email the form directly to the National Election Office; keep this instruction sheet separate.' : 'Use legal paper (8.5 x 14 in). If using letter paper, choose Fit to page and make sure every word is readable. Keep this instruction page.'] },
         { title: signed ? 'Check your signature' : 'Sign in ink', body: [signed ? 'Your drawn signature and date are already on the form. Check that they are clear and entirely inside the signature box, without touching the borders.' : 'Sign with a blue or black pen, inside the signature box without touching its borders. Write the date beside it.'] },
-        { title: 'Gather your document copies', body: ['For Pohnpei, include a birth certificate and one photo ID. Send copies only, never originals. If requesting a voter ID card, include the required current 2 x 2 inch photo.'] },
+        { title: 'Gather your document copies', body: ['Include a birth certificate and one photo ID. Send copies only, never originals. If requesting a voter ID card, include the required current 2 x 2 inch photo.'] },
         { title: email ? 'Scan your supporting documents' : 'Scan the signed form and your documents', body: scan },
-        { title: pohnpei ? 'Email both Pohnpei addresses' : 'Confirm submission with your state office', body: [
-          pohnpei ? `Send ${email ? 'your signed PDF' : 'a scanned copy of your signed form'} plus your birth certificate and photo ID to both addresses:` : 'The following email route is Pohnpei-specific. If registering in Chuuk, Kosrae or Yap, confirm the required documents and delivery method with that office.',
-          ...(pohnpei ? [POHNPEI_EMAILS.join(' and '), `Subject: Voter Registration - your full name. ${email ? 'Attach your document copies yourself, or check that they are included in your merged PDF.' : 'Attach the scanned form and document copies.'} Do not send this instruction page.`] : []),
+        { title: 'Email your registration', body: [
+          `Send ${email ? 'your signed PDF' : 'a scanned copy of your signed form'} plus your birth certificate and photo ID to both addresses:`,
+          REGISTRATION_EMAILS.join(' and '),
+          `Subject: Voter Registration - your full name. ${email ? 'Attach your document copies yourself, or check that they are included in your merged PDF.' : 'Attach the scanned form and document copies.'} Do not send this instruction page.`,
         ] },
       ],
       reminder: 'Being registered does not send you a ballot. You must also submit the Absentee Ballot Application. For a ballot by mail, that request must arrive by January 21, 2027.',
@@ -35,7 +35,7 @@ export function guideContent(form, values, signed = false) {
     steps: [
       { title: 'Print your filled form', body: ['Use legal paper (8.5 x 14 in), or select Fit to page on letter paper. Check that all answers and the printed instructions are readable.'] },
       { title: signed ? 'Check your signature' : 'Sign in ink', body: [signed ? 'Your drawn signature and date are already on the form. Check that both are clear. You must still print and post or hand-deliver this application.' : 'Sign with a blue or black pen on the signature line and write the date beside it.'] },
-      { title: 'DO NOT EMAIL THIS FORM', body: ['Unlike Pohnpei voter registration, an absentee application can only be accepted by post or hand delivery. An emailed request does not count.'], emphasis: true },
+      { title: 'DO NOT EMAIL THIS FORM', body: ['Unlike voter registration, an absentee application can only be accepted by post or hand delivery. An emailed request does not count.'], emphasis: true },
       { title: 'Address the envelope', body: office ? [`For ${values.state}, use the address printed on your form:`, office.join(', ')] : ['Select your state in the form to include its office address here. Use the appropriate state office address printed on the application.'] },
       { title: 'Post early and keep the tear-off receipt', body: ['Allow four to six weeks each way for postal delivery. Keep the tear-off receipt for your records.', 'For a ballot by mail, your request must ARRIVE by January 21, 2027.', 'Aim to post the voted ballot back by around mid-January if you have received it. If it arrives later, contact the office promptly about returning it in time.', 'The voted ballot must have ARRIVED by March 2, 2027. A postmark is not enough.', ...(option && values.type !== 'A' ? [`Your selected option is ${option.l}. ${option.due}. January 21 is the deadline for requests for a ballot by mail.`] : [])] },
     ],
@@ -95,7 +95,7 @@ export function drawInstructionPage(doc, form, values, signed, fonts, PDFLib) {
   page.drawRectangle({x:36,y:top-boxHeight+4,width:540,height:boxHeight,color:pale});
   reminderLines.forEach((line,i)=>page.drawText(line,{x:48,y:top-10-i*leading,size,font,color:ink}));
   page.drawLine({start:{x:36,y:84},end:{x:576,y:84},thickness:.6,color:rgb(.76,.83,.87)});
-  page.drawText('Pohnpei National Election Office | (691) 320-4125',{x:36,y:66,size:10,font:bold,color:navy});
+  page.drawText('FSM National Election Office | (691) 320-4125',{x:36,y:66,size:10,font:bold,color:navy});
   page.drawText('deeann.david@election.fm',{x:36,y:50,size:10,font,color:ocean});
   page.drawText('Pohnpei is 15 hours ahead of the US east coast during daylight time; 16 in standard time.',{x:36,y:33,size:8.8,font,color:muted});
   return page;

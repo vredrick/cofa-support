@@ -120,7 +120,7 @@ test('Drawn signatures embed an image and date; print mode adds neither', async 
   }
 });
 
-test('Pohnpei email packets exclude instructions and merge only deliberately supplied copies', async () => {
+test('Registration email packets work for all four states and exclude the instruction sheet', async () => {
   const template = await templateFor(registration);
   const values = {state:'Pohnpei'};
   const signed = await createElectionPdf(registration,values,template,true,PDFLib,{signature});
@@ -132,9 +132,13 @@ test('Pohnpei email packets exclude instructions and merge only deliberately sup
   const instructions = await PDFLib.PDFDocument.load(await createInstructionPdf(registration,values,true,PDFLib));
   assert.equal(instructions.getPageCount(),1);
   assert.deepEqual(instructions.getPages()[0].getSize(),{width:612,height:1008});
-  for (const state of ['Chuuk','Kosrae','Yap','']) {
-    await assert.rejects(createElectionPdf(registration,{state},template,false,PDFLib,{signature,attachments}),/only available/);
+  for (const state of ['Chuuk','Kosrae','Yap']) {
+    const standalone = await createElectionPdf(registration,{state},template,true,PDFLib,{signature});
+    assert.equal((await PDFLib.PDFDocument.load(standalone)).getPageCount(),1);
+    const packet = await createElectionPdf(registration,{state},template,true,PDFLib,{signature,attachments});
+    assert.equal((await PDFLib.PDFDocument.load(packet)).getPageCount(),2);
   }
+  await assert.rejects(createElectionPdf(registration,{state:''},template,false,PDFLib,{signature,attachments}),/only available/);
   await assert.rejects(createElectionPdf(registration,values,template,false,PDFLib,{attachments}),/only available/);
   await assert.rejects(createElectionPdf(absentee,values,await templateFor(absentee),false,PDFLib,{signature,attachments}),/only available/);
 });
